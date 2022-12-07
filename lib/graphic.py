@@ -98,12 +98,12 @@ def drawGraph(type_gene, net, namefile, pearson, autoSaveImg, list_Genes, range_
     i = 0
     while i < len(edges):
         tmp = edges[i]
-        edges[i] = (idNode[list(oldidNode.keys())[list(oldidNode.values()).index(tmp[0])]], idNode[list(oldidNode.keys())[list(oldidNode.values()).index(tmp[1])]], tmp[2])
+        edges[i] = (list(oldidNode.keys())[list(oldidNode.values()).index(tmp[0])].split('@')[1], list(oldidNode.keys())[list(oldidNode.values()).index(tmp[1])].split('@')[1], tmp[2])
         i += 1
     i = 0
     while i < len(newPearson):
         tmp = newPearson[i]
-        newPearson[i] = (idNode[list(oldidNode.keys())[list(oldidNode.values()).index(tmp[0])]], idNode[list(oldidNode.keys())[list(oldidNode.values()).index(tmp[1])]], tmp[2])
+        newPearson[i] = (list(oldidNode.keys())[list(oldidNode.values()).index(tmp[0])].split('@')[1], list(oldidNode.keys())[list(oldidNode.values()).index(tmp[1])].split('@')[1], tmp[2])
         i += 1
 
     G = nx.Graph()
@@ -121,7 +121,7 @@ def drawGraph(type_gene, net, namefile, pearson, autoSaveImg, list_Genes, range_
                 f.write('Node subgraph '+str(i+1)+':\n')
                 lNodes = []
                 for n in s.nodes():
-                    lNodes.append((list(idNode.keys())[list(idNode.values()).index(n)]))
+                    lNodes.append(n)
                 f.write(str(lNodes)+'\n')
             i += 1
         f.close()
@@ -130,12 +130,12 @@ def drawGraph(type_gene, net, namefile, pearson, autoSaveImg, list_Genes, range_
     ePos = [(u, v) for (u, v, p) in newPearson if p >= 0]
     eNeg = [(u, v) for (u, v, p) in newPearson if p < 0]
 
-    estrongPos = [(u, v) for (u, v, d) in G.edges(data=True) if d['weight'] > step2_range and ((u, v) in ePos or (v, u) in ePos)]
-    estrongNeg = [(u, v) for (u, v, d) in G.edges(data=True) if d['weight'] > step2_range and ((u, v) in eNeg or (v, u) in eNeg)]
-    emediumPos = [(u, v) for (u, v, d) in G.edges(data=True) if d['weight'] <= step2_range and d['weight'] > step1_range and ((u, v) in ePos or (v, u) in ePos)]
-    emediumNeg = [(u, v) for (u, v, d) in G.edges(data=True) if d['weight'] <= step2_range and d['weight'] > step1_range and ((u, v) in eNeg or (v, u) in eNeg)]
-    eweakPos = [(u, v) for (u, v, d) in G.edges(data=True) if d['weight'] <= step1_range and ((u, v) in ePos or (v, u) in ePos)]
-    eweakNeg = [(u, v) for (u, v, d) in G.edges(data=True) if d['weight'] <= step1_range and ((u, v) in eNeg or (v, u) in eNeg)]
+    estrongPos = [(u, v) for (u, v, d) in G.edges(data=True) if float(d['weight']) > step2_range and ((u, v) in ePos or (v, u) in ePos)]
+    estrongNeg = [(u, v) for (u, v, d) in G.edges(data=True) if float(d['weight']) > step2_range and ((u, v) in eNeg or (v, u) in eNeg)]
+    emediumPos = [(u, v) for (u, v, d) in G.edges(data=True) if float(d['weight']) <= step2_range and d['weight'] > step1_range and ((u, v) in ePos or (v, u) in ePos)]
+    emediumNeg = [(u, v) for (u, v, d) in G.edges(data=True) if float(d['weight']) <= step2_range and d['weight'] > step1_range and ((u, v) in eNeg or (v, u) in eNeg)]
+    eweakPos = [(u, v) for (u, v, d) in G.edges(data=True) if float(d['weight']) <= step1_range and ((u, v) in ePos or (v, u) in ePos)]
+    eweakNeg = [(u, v) for (u, v, d) in G.edges(data=True) if float(d['weight']) <= step1_range and ((u, v) in eNeg or (v, u) in eNeg)]
     # positions for all nodes
     pos = comp.layout_many_components(G, component_layout_func=nx.layout.circular_layout)
     if typePrint:
@@ -166,9 +166,10 @@ def drawGraph(type_gene, net, namefile, pearson, autoSaveImg, list_Genes, range_
         # print(G.nodes())
         vector_isoColor = [] #FANTOM
         if typeDB and len(dict_isoColor) > 0: #FANTOM
-            for node in G.nodes(): #FANTOM
-                vector_isoColor.append(dict_isoColor[node]) #FANTOM
-            nx.draw_networkx_nodes(G, pos, node_size=n_size, node_color=vector_isoColor) #FANTOM
+            # for node in G.nodes(): #FANTOM
+                # vector_isoColor.append(dict_isoColor[node]) #FANTOM
+            # nx.draw_networkx_nodes(G, pos, node_size=n_size, node_color=vector_isoColor) #FANTOM
+            nx.draw_networkx_nodes(G, pos, node_size=n_size, node_color='#88cafc') #FANTOM
         else:
             nx.draw_networkx_nodes(G, pos, node_size=n_size, node_color='#C7E7EB')  #TCGA
     else:
@@ -181,7 +182,7 @@ def drawGraph(type_gene, net, namefile, pearson, autoSaveImg, list_Genes, range_
     nx.draw_networkx_edges(G, pos, edgelist=emediumNeg, width=e_size/2, edge_color='red', style='dashed')
     nx.draw_networkx_edges(G, pos, edgelist=eweakNeg, width=e_size/2, edge_color='red', style='dotted')
     # labels
-    nx.draw_networkx_labels(G, pos, font_size=f_size, font_family='sans-serif')
+    nx.draw_networkx_labels(G, pos, font_size=f_size, font_family='sans-serif', font_color='green')
     plt.axis('off')
 
     #title
@@ -206,25 +207,6 @@ def drawGraph(type_gene, net, namefile, pearson, autoSaveImg, list_Genes, range_
     else:
         #textLegend = [black_line, blue_line, red_line, idName]
         textLegend = [black_line, blue_line, red_line] #todel
-    # nameGenes = idNode.keys()
-    #
-    # if len(nameGenes) < 15:
-    #     tmpList = {}
-    #     for k in nameGenes:
-    #         tmpList[idNode[k]] = k
-    #     for k in sorted(tmpList.keys()):
-    #         textLegend.append(mlines.Line2D([], [], label=str(k)+' --> '+tmpList[k], visible=False))
-    # else:
-    #     fileOut = namefile+'_ID_NAME.txt'
-    #     print('Too many nodes, ID --> NAME write in: \''+fileOut+'\'')
-    #     f = open(fileOut, 'w')
-    #     f.write('ID --> NODE\n')
-    #     tmpList = {}
-    #     for k in nameGenes:
-    #         tmpList[idNode[k]] = k
-    #     for k in sorted(tmpList.keys()):
-    #         f.write(str(k)+' --> '+tmpList[k]+'\n')
-    #     #textLegend.append(mlines.Line2D([], [], label='in \''+fileOut+'\'', visible=False))
 
     #Write legend ID-->GENE
     nameGenes = idNode.keys()

@@ -1,8 +1,8 @@
 # Tools_Expand_Genes_Network
- Tools used to analyze and expand gene networks of Vitis Vinifera and Human. All this tools used Python 3 and R.
+ Tools used to analyze and expand gene networks of Vitis Vinifera and Human. All this tools used Python 3 and R. It works the same as the original project it was forked from, with the exceptions that it has been made compatible with Python 3.10 and the gene network gets printed with gene names instead of numbers.
 
 ## Prerequisites
-  Python 3
+  Python 3.10+
 
   To install the required Python libraries and R packages:
   ```

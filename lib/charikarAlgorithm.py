@@ -28,7 +28,7 @@ def f_pop(counter):
         del dic[k]
         del deg[k]
 
-#averago of weight of each node
+#average of weight of each node
 def avgWeight(idNode, completeGraph):
     dicW.clear()
     weight = []
@@ -39,7 +39,8 @@ def avgWeight(idNode, completeGraph):
         if len(k) > 0:
             avg = 0.0
             for t in k:
-                avg += t[1]
+                if not isinstance(t[1], str):
+                    avg += t[1]
             avg = avg/len(k)
             dicW[idNode[k[0][0]]] = avg
 
