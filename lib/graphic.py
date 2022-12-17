@@ -160,20 +160,14 @@ def drawGraph(type_gene, net, namefile, pearson, autoSaveImg, list_Genes, range_
         n_size = 150
         f_size = 8
         e_size = 1.5
-    #draw node is different for human and vitis
-    if type_gene == 'H' and not comprimeNode:
-        # print(dict_isoColor.keys())
-        # print(G.nodes())
-        vector_isoColor = [] #FANTOM
-        if typeDB and len(dict_isoColor) > 0: #FANTOM
-            # for node in G.nodes(): #FANTOM
-                # vector_isoColor.append(dict_isoColor[node]) #FANTOM
-            # nx.draw_networkx_nodes(G, pos, node_size=n_size, node_color=vector_isoColor) #FANTOM
-            nx.draw_networkx_nodes(G, pos, node_size=n_size, node_color='#88cafc') #FANTOM
+    
+    vector_isoColor = []
+    for node in G.nodes():
+        if 'SNO' in node:
+            vector_isoColor.append('#80FF80')
         else:
-            nx.draw_networkx_nodes(G, pos, node_size=n_size, node_color='#C7E7EB')  #TCGA
-    else:
-        nx.draw_networkx_nodes(G, pos, node_size=n_size, node_color='#C7E7EB')
+            vector_isoColor.append('#88cafc')
+    nx.draw_networkx_nodes(G, pos, node_size=n_size, node_color=vector_isoColor)
     # edges
     nx.draw_networkx_edges(G, pos, edgelist=estrongPos, width=e_size, edge_color='black')
     nx.draw_networkx_edges(G, pos, edgelist=emediumPos, width=e_size/2, edge_color='black', style='dashed')
@@ -182,7 +176,7 @@ def drawGraph(type_gene, net, namefile, pearson, autoSaveImg, list_Genes, range_
     nx.draw_networkx_edges(G, pos, edgelist=emediumNeg, width=e_size/2, edge_color='red', style='dashed')
     nx.draw_networkx_edges(G, pos, edgelist=eweakNeg, width=e_size/2, edge_color='red', style='dotted')
     # labels
-    nx.draw_networkx_labels(G, pos, font_size=f_size, font_family='sans-serif', font_color='green')
+    nx.draw_networkx_labels(G, pos, font_size=f_size, font_family='sans-serif', font_color='#0000FF')
     plt.axis('off')
 
     #title
@@ -211,86 +205,28 @@ def drawGraph(type_gene, net, namefile, pearson, autoSaveImg, list_Genes, range_
     #Write legend ID-->GENE
     nameGenes = idNode.keys()
     dictStrToWrite = {}
-    if type_gene == 'V':
-        #UPDATE NAME GENE
-        f = open('import_doc/NewAnnotVitisnet3.csv', 'r')
-        text = f.readlines()
-        listLineName = []
-        i = 1
-        while i < len(text):
-            listLineName.append(text[i].split(','))
-            i += 1
-        listBioNameUpdate = {}
-        for l in listLineName:
-            if l[3] != '':
-                if l[3] not in listBioNameUpdate.values():
-                    listBioNameUpdate[l[0].upper()] = l[3]
-                else:
-                    listBioNameUpdate[l[0].upper()] = l[3]+'_'+l[0].upper()
-            elif l[2] != '':
-                if l[2] not in listBioNameUpdate.values():
-                    listBioNameUpdate[l[0].upper()] = l[2]
-                else:
-                    listBioNameUpdate[l[0].upper()] = l[2]+'_'+l[0].upper()
-            else:
-                listBioNameUpdate[l[0].upper()] = l[0].upper()
-        f.close()
-        #Read information of Vitis genes
-        f = open('import_doc/NewAnnotVitisnet3.csv', 'r')
-        text = f.readlines()
-        listLineName = []
-        i = 1
-        while i < len(text):
-            listLineName.append(text[i].split(','))
-            i += 1
-        for k in nameGenes:
-            listBR = (list(listBioNameUpdate.keys())[list(listBioNameUpdate.values()).index(k)]).split('<BR>')
-            #listBR = k.split('<BR>')
-            for elem in listBR:
-                try:
-                    #print([u[0].upper() for u in listLineName])
-                    if elem in [u[0].upper() for u in listLineName]:
-                        index = [u[0].upper() for u in listLineName].index(elem)
-                        u = listLineName[index]
-                        dictStrToWrite[elem] = str(u[0])+','+str(u[1])+','+str(u[2])+','+str(u[3])+','+str(u[4])+','+str(u[5])
-                except:
-                    pass
-        fileOut = namefile.split('graph')[0]+'graph_legend_ID_NAME.csv'
-        print('LEGEND IN: \''+fileOut+'\'')
-        f = open(fileOut, 'w')
-        f.write('ID in graph,'+text[0].split(',')[0]+','+text[0].split(',')[1]+','+text[0].split(',')[2]+','+text[0].split(',')[3]+','+text[0].split(',')[4]+','+text[0].split(',')[5])
-        for k in nameGenes:
-            listBR = (list(listBioNameUpdate.keys())[list(listBioNameUpdate.values()).index(k)]).split('<BR>')
-            #listBR = k.split('<BR>')
-            for elem in listBR:
-                try:
-                    f.write(str(idNode[k])+','+dictStrToWrite[elem])
-                except:
-                    pass
-        f.close()
-    else:
-        #Print legend for human
-        f = open('import_doc/anno-hsf5.csv', 'r')
-        text = f.readlines()
-        listLineName = {}
-        i = 1
-        while i < len(text):
-            tmpLine = text[i].split(',')
-            if '@'+tmpLine[5][1:-1] in nameGenes:
-                listLineName['@'+tmpLine[5][1:-1]] = ','.join([str(elem) for elem in tmpLine[1:]])
-            i += 1
-        fileOut = namefile.split('graph')[0]+'graph_legend_ID_NAME.csv'
-        print('LEGEND IN: \''+fileOut+'\'')
-        f = open(fileOut, 'w')
-        f.write('ID,NODE,association_with_transcript,entrezgene_id,hgnc_id,uniprot_id,gene_name,description,type\n')
-        tmpList = {}
-        for k in nameGenes:
-            tmpList[idNode[k]] = k
-        for k in sorted(tmpList.keys()):
-            try:
-                f.write(str(k)+','+tmpList[k]+','+listLineName[tmpList[k]])
-            except:
-                f.write(str(k)+','+tmpList[k]+'\n')
+    #Print legend for human
+    f = open('import_doc/anno-hsf5.csv', 'r')
+    text = f.readlines()
+    listLineName = {}
+    i = 1
+    while i < len(text):
+        tmpLine = text[i].split(',')
+        if '@'+tmpLine[5][1:-1] in nameGenes:
+            listLineName['@'+tmpLine[5][1:-1]] = ','.join([str(elem) for elem in tmpLine[1:]])
+        i += 1
+    fileOut = namefile.split('graph')[0]+'graph_legend_ID_NAME.csv'
+    print('LEGEND IN: \''+fileOut+'\'')
+    f = open(fileOut, 'w')
+    f.write('ID,NODE,association_with_transcript,entrezgene_id,hgnc_id,uniprot_id,gene_name,description,type\n')
+    tmpList = {}
+    for k in nameGenes:
+        tmpList[idNode[k]] = k
+    for k in sorted(tmpList.keys()):
+        try:
+            f.write(str(k)+','+tmpList[k]+','+listLineName[tmpList[k]])
+        except:
+            f.write(str(k)+','+tmpList[k]+'\n')
 
     plt.legend(handles=textLegend, fontsize = 'xx-small').set_draggable(True)
     #autoSave PNG or show
